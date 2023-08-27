@@ -4,6 +4,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 
 import gr.aueb.cf.schoolapp.dao.StudentDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.StudentDAOException;
 import gr.aueb.cf.schoolapp.model.Student;
 import gr.aueb.cf.schoolapp.service.StudentServiceImpl;
@@ -31,19 +32,20 @@ public class SearchStudentsController extends HttpServlet {
     private StudentDAOHibernateImpl studentDAO = new StudentDAOHibernateImpl(entityManager);
     private StudentServiceImpl studentService = new StudentServiceImpl(studentDAO);
 
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         request.getRequestDispatcher("/schoolapp/menu")
                 .forward(request, response);
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String lastname = request.getParameter("lastname").trim();
-        entityManager.clear();
+
+        // Clear EntityManager to ensure it's up-to-date
+        HibernateHelper.getEntityManager().clear();
 
         try {
             List<Student> students = studentService.getStudentsByLastname(lastname);
@@ -61,5 +63,11 @@ public class SearchStudentsController extends HttpServlet {
             request.setAttribute("message", message);
             request.getRequestDispatcher("/school/static/templates/studentsmenu.jsp").forward(request, response);
         }
+    }
+
+    @Override
+    public void destroy() {
+        // Close EntityManager when servlet is destroyed
+        HibernateHelper.closeEntityManager();
     }
 }

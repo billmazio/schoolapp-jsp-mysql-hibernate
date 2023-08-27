@@ -2,6 +2,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 
 import gr.aueb.cf.schoolapp.dao.CityDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.CityDAOException;
 import gr.aueb.cf.schoolapp.dto.CityUpdateDTO;
 import gr.aueb.cf.schoolapp.model.City;
@@ -57,6 +58,8 @@ public class UpdateCityController extends HttpServlet {
             }
 
             City city =  cityService.updateCity(newCityDTO);
+            HibernateHelper.getEntityManager().clear();
+
             request.setAttribute("message", "");
             request.setAttribute("city", city);
             request.getRequestDispatcher("/school/static/templates/cityUpdated.jsp")
@@ -68,5 +71,10 @@ public class UpdateCityController extends HttpServlet {
                     .forward(request, response);
 
         }
+    }
+    @Override
+    public void destroy() {
+        HibernateHelper.closeEntityManager();
+        HibernateHelper.closeEMF();
     }
 }

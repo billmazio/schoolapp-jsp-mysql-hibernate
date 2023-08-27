@@ -4,6 +4,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 
 import gr.aueb.cf.schoolapp.dao.CityDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.CityDAOException;
 import gr.aueb.cf.schoolapp.model.City;
 import gr.aueb.cf.schoolapp.service.CityServiceImpl;
@@ -41,7 +42,8 @@ public class SearchCitiesController extends HttpServlet {
             throws ServletException, IOException {
         //response.setContentType("text/html; charset=UTF-8");
         String name = request.getParameter("name").trim();
-        entityManager.clear();
+        // Clear EntityManager to ensure it's up-to-date
+        HibernateHelper.getEntityManager().clear();
 
         try {
             List<City> cities = cityService.getCitiesByCityName(name);
@@ -61,5 +63,10 @@ public class SearchCitiesController extends HttpServlet {
 
 
         }
+    }
+    @Override
+    public void destroy() {
+        // Close EntityManager when servlet is destroyed
+        HibernateHelper.closeEntityManager();
     }
 }

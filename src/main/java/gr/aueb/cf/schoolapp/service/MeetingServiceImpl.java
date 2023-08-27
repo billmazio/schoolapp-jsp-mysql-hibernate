@@ -18,6 +18,8 @@ public class MeetingServiceImpl implements IMeetingService{
         this.meetingDAO = meetingDAO;
     }
 
+
+
     @Override
     public Meeting insertMeeting(MeetingInsertDTO dto) throws MeetingDAOException {
        Meeting meeting = new Meeting();
@@ -51,6 +53,9 @@ public class MeetingServiceImpl implements IMeetingService{
         }
         meetingDAO.delete(id);
     }
+
+
+
 
     @Override
     public List<Meeting> getMeetingByRoom(String room) throws MeetingDAOException, MeetingNotFoundException {

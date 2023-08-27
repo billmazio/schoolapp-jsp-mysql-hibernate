@@ -12,7 +12,7 @@
 <h1>Meeting updated successfully</h1>
 <div>
     <p>Meeting ID: ${requestScope.updatedMeeting.id}</p>
-    <p>Teacher's ID: ${requestScope.updatedMeeting.teacher}</p>
+    <p>Teachers ID: ${requestScope.updatedMeeting.teacher}</p>
     <p>Students ID: ${requestScope.updatedMeeting.student}</p>
     <p>Room: ${requestScope.updatedMeeting.room}</p>
     <p>Meeting Date: ${requestScope.updatedMeeting.meetingDate}</p>

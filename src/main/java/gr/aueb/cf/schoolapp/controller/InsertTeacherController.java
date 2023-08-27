@@ -4,6 +4,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 import gr.aueb.cf.schoolapp.dao.SpecialtyDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.TeacherDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.SpecialtyDAOException;
 import gr.aueb.cf.schoolapp.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp.model.Specialty;
@@ -30,27 +31,16 @@ import java.util.Optional;
 @WebServlet("/schoolapp/teacherInsert")
 public class InsertTeacherController extends HttpServlet {
     private static final long serialVersionUID = 1L;
+        private EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
+        private EntityManager entityManager = emf.createEntityManager();
 
-    private EntityManagerFactory emf;
-    private EntityManager entityManager;
+        private TeacherDAOHibernateImpl teacherDAO = new TeacherDAOHibernateImpl(entityManager);
+        private TeacherServiceImpl teacherService = new TeacherServiceImpl(teacherDAO);
 
-    private TeacherDAOHibernateImpl teacherDAO;
-    private TeacherServiceImpl teacherService;
+    private SpecialtyDAOHibernateImpl specialtyDAO = new SpecialtyDAOHibernateImpl(entityManager);
+    private SpecialtyServiceImpl specialtyService = new SpecialtyServiceImpl(specialtyDAO);
 
-    private SpecialtyDAOHibernateImpl specialtyDAO;
-    private SpecialtyServiceImpl specialtyService;
 
-    @Override
-    public void init() throws ServletException {
-        emf = Persistence.createEntityManagerFactory("myPU");
-        entityManager = emf.createEntityManager();
-
-        teacherDAO = new TeacherDAOHibernateImpl(entityManager);
-        teacherService = new TeacherServiceImpl(teacherDAO);
-
-        specialtyDAO = new SpecialtyDAOHibernateImpl(entityManager);
-        specialtyService = new SpecialtyServiceImpl(specialtyDAO);
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -136,10 +126,9 @@ public class InsertTeacherController extends HttpServlet {
             request.getRequestDispatcher("/school/static/templates/teachersmenu.jsp").forward(request, response);
         }
     }
-
     @Override
     public void destroy() {
-        entityManager.close();
-        emf.close();
+        HibernateHelper.closeEntityManager();
+        HibernateHelper.closeEMF();
     }
 }

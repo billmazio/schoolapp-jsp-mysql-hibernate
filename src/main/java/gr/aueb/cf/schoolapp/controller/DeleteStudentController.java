@@ -4,17 +4,21 @@ package gr.aueb.cf.schoolapp.controller;
 
 
 import gr.aueb.cf.schoolapp.dao.CityDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.MeetingDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.StudentDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.CityDAOException;
-
+import gr.aueb.cf.schoolapp.dao.exceptions.MeetingDAOException;
 import gr.aueb.cf.schoolapp.dao.exceptions.StudentDAOException;
 import gr.aueb.cf.schoolapp.dto.StudentDeleteDTO;
 import gr.aueb.cf.schoolapp.model.City;
+import gr.aueb.cf.schoolapp.model.Meeting;
+import gr.aueb.cf.schoolapp.model.Student;
 import gr.aueb.cf.schoolapp.service.CityServiceImpl;
-
+import gr.aueb.cf.schoolapp.service.MeetingServiceImpl;
 import gr.aueb.cf.schoolapp.service.StudentServiceImpl;
+import gr.aueb.cf.schoolapp.service.exceptions.MeetingNotFoundException;
 import gr.aueb.cf.schoolapp.service.exceptions.StudentNotFoundException;
-
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -40,6 +44,10 @@ public class DeleteStudentController extends HttpServlet {
     private CityDAOHibernateImpl cityDAO = new CityDAOHibernateImpl(entityManager);
     private CityServiceImpl cityService = new CityServiceImpl(cityDAO);
 
+    private MeetingDAOHibernateImpl meetingDAO = new MeetingDAOHibernateImpl(entityManager);
+    private MeetingServiceImpl meetingService = new MeetingServiceImpl(meetingDAO); // Initialize your MeetingService
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
@@ -50,7 +58,6 @@ public class DeleteStudentController extends HttpServlet {
         String cityName = request.getParameter("city");
 
 
-        // Convert birthdate to java.sql.Date format
         java.sql.Date birthdate = null;
         if (birthdateStr != null && !birthdateStr.isEmpty()) {
             try {
@@ -73,7 +80,7 @@ public class DeleteStudentController extends HttpServlet {
                     city = citiesOptional.get().get(0);
                 } else {
                     request.setAttribute("deleteAPIError", true);
-                    request.setAttribute("message", "City not found.");
+                    request.setAttribute("message", "Specialty not found.");
                     request.getRequestDispatcher("/school/static/templates/students.jsp")
                             .forward(request, response);
                     return;
@@ -87,25 +94,39 @@ public class DeleteStudentController extends HttpServlet {
             }
         }
 
-
-
-
-
-
-        StudentDeleteDTO studentDTO = new StudentDeleteDTO();
-        studentDTO.setId(id);
-        studentDTO.setFirstname(firstname);
-        studentDTO.setLastname(lastname);
-        studentDTO.setGender(gender);
-        studentDTO.setBirthdate(birthdate);
-        studentDTO.setCity(city);  // Assuming you've updated your DTO to store City objects
-
         try {
+            // Retrieve the student to be deleted
+            Student studentToDelete = studentService.getStudentById(id);
+
+
+
+            // Retrieve related meetings of the student
+            List<Meeting> studentMeetings = studentToDelete.getMeetings();
+
+            // Delete each related meeting first
+            for (Meeting meeting : studentMeetings) {
+                meetingService.deleteMeeting(meeting.getId());
+                HibernateHelper.getEntityManager().clear();
+
+            }
+
+            // Now delete the student
+
+            StudentDeleteDTO studentDTO = new StudentDeleteDTO();
+            studentDTO.setId(id);
+            studentDTO.setFirstname(firstname);
+            studentDTO.setLastname(lastname);
+            studentDTO.setGender(gender);
+            studentDTO.setBirthdate(birthdate);
+            studentDTO.setCity(city);  // Assuming you've updated your DTO to store City objects
+
             studentService.deleteStudent(id);
+            HibernateHelper.getEntityManager().clear();
+
             request.setAttribute("studentDTO", studentDTO);
             request.getRequestDispatcher("/school/static/templates/studentDeleted.jsp")
                     .forward(request, response);
-        } catch (StudentNotFoundException | StudentDAOException e) {
+        } catch (StudentNotFoundException | StudentDAOException | MeetingDAOException | MeetingNotFoundException e) {
             request.setAttribute("deleteAPIError", true);
             request.setAttribute("message", e.getMessage());
             request.getRequestDispatcher("/school/static/templates/students.jsp")
@@ -113,5 +134,10 @@ public class DeleteStudentController extends HttpServlet {
         }
     }
 
-
+    @Override
+    public void destroy() {
+        HibernateHelper.closeEntityManager();
+        HibernateHelper.closeEMF();
+    }
 }
+

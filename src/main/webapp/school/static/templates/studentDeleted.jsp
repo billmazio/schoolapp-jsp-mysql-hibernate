@@ -15,4 +15,4 @@
     was deleted</p>
 <a href="${pageContext.request.contextPath}/schoolapp/studentInsert">Επιστροφή</a>
 </body>
-</html>z
+</html>

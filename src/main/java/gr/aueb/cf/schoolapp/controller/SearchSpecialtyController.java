@@ -3,6 +3,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 
 import gr.aueb.cf.schoolapp.dao.SpecialtyDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.SpecialtyDAOException;
 import gr.aueb.cf.schoolapp.model.Specialty;
 import gr.aueb.cf.schoolapp.service.SpecialtyServiceImpl;
@@ -37,7 +38,8 @@ public class SearchSpecialtyController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String name = request.getParameter("name").trim();
-        entityManager.clear();
+        // Clear EntityManager to ensure it's up-to-date
+        HibernateHelper.getEntityManager().clear();
 
         try {
             List<Specialty> specialties = specialtyService.getSpecialtiesBySpecialtyName(name);
@@ -54,5 +56,10 @@ public class SearchSpecialtyController extends HttpServlet {
             request.setAttribute("message", message);
             request.getRequestDispatcher("/school/static/templates/specialtiesmenu.jsp").forward(request, response);
         }
+    }
+    @Override
+    public void destroy() {
+        // Close EntityManager when servlet is destroyed
+        HibernateHelper.closeEntityManager();
     }
 }

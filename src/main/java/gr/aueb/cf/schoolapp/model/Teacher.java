@@ -68,9 +68,6 @@ public class Teacher {
         return specialty;
     }
 
-    public void setSpecialty(Specialty specialty) {
-        this.specialty = specialty;
-    }
 
     public List<Meeting> getMeetings() {
         return meetings;
@@ -82,11 +79,23 @@ public class Teacher {
 
     @Override
     public String toString() {
-        return "Teacher{" +
+        return "teacher{" +
                 "id=" + id +
-                ", firstName='" + firstname + '\'' +
-                ", lastName='" + lastname + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
                 ", specialty=" + specialty +
                 '}';
     }
+
+    public void setSpecialty(Specialty specialty) {
+        if (this.specialty != null) {
+            this.specialty.getTeachers().remove(this);
+        }
+        this.specialty = specialty;
+        if (specialty != null) {
+            specialty.getTeachers().add(this);
+        }
+    }
+
+
 }

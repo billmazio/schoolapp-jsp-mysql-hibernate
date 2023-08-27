@@ -62,4 +62,20 @@ import java.util.List;
                     ", name='" + name + '\'' +
                     '}';
         }
+
+
+    public void addTeacher(Teacher teacher) {
+        if (teachers == null) {
+            teachers = new ArrayList<>();
+        }
+        teachers.add(teacher);
+        teacher.setSpecialty(this);
     }
+
+    public void removeTeacher(Teacher teacher) {
+        teachers.remove(teacher);
+        teacher.setSpecialty(null);
+    }
+
+    }
+

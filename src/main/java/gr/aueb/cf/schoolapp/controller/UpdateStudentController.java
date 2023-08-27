@@ -2,6 +2,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 import gr.aueb.cf.schoolapp.dao.CityDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.StudentDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.CityDAOException;
 import gr.aueb.cf.schoolapp.dao.exceptions.StudentDAOException;
 import gr.aueb.cf.schoolapp.dto.StudentUpdateDTO;
@@ -30,26 +31,16 @@ import java.util.Optional;
 public class UpdateStudentController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private EntityManagerFactory emf;
-    private EntityManager entityManager;
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
+    private EntityManager entityManager = emf.createEntityManager();
 
-    private StudentDAOHibernateImpl studentDAO;
-    private StudentServiceImpl studentService;
+    private StudentDAOHibernateImpl studentDAO = new StudentDAOHibernateImpl(entityManager);
+    private StudentServiceImpl studentService = new StudentServiceImpl(studentDAO);
 
-    private CityDAOHibernateImpl cityDAO;
-    private CityServiceImpl cityService;
+    private CityDAOHibernateImpl cityDAO = new CityDAOHibernateImpl(entityManager);
+    private CityServiceImpl cityService = new CityServiceImpl(cityDAO);
 
-    @Override
-    public void init() throws ServletException {
-        emf = Persistence.createEntityManagerFactory("myPU");
-        entityManager = emf.createEntityManager();
 
-        studentDAO = new StudentDAOHibernateImpl(entityManager);
-        studentService = new StudentServiceImpl(studentDAO);
-
-        cityDAO = new CityDAOHibernateImpl(entityManager);
-        cityService = new CityServiceImpl(cityDAO);
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -115,6 +106,8 @@ public class UpdateStudentController extends HttpServlet {
             }
 
             Student student = studentService.updateStudent(newStudentDTO);
+            HibernateHelper.getEntityManager().clear();
+
             request.setAttribute("message", "Student successfully updated!");
             request.setAttribute("updatedStudent", student);
             request.getRequestDispatcher("/school/static/templates/studentUpdated.jsp")
@@ -145,7 +138,7 @@ public class UpdateStudentController extends HttpServlet {
 
     @Override
     public void destroy() {
-        entityManager.close();
-        emf.close();
+        HibernateHelper.closeEntityManager();
+        HibernateHelper.closeEMF();
     }
 }

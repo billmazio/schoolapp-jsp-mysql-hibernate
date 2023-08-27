@@ -91,9 +91,6 @@ public class Student {
         return city;
     }
 
-    public void setCity(City city) {
-        this.city = city;
-    }
 
     public List<Meeting> getMeetings() {
         return meetings;
@@ -105,14 +102,26 @@ public class Student {
 
     @Override
     public String toString() {
-        return "Student{" +
+        return "student{" +
                 "id=" + id +
-                ", firstName='" + firstname + '\'' +
-                ", lastName='" + lastname + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
                 ", gender='" + gender + '\'' +
-                ", birthDate=" + birthdate +
+                ", birthdate=" + birthdate +
                 ", city=" + city +
                 '}';
     }
+
+    public void setCity(City city) {
+        if (this.city != null) {
+            this.city.getStudents().remove(this);
+        }
+        this.city = city;
+        if (city != null) {
+            city.getStudents().add(this);
+        }
+   }
+
+
 }
 

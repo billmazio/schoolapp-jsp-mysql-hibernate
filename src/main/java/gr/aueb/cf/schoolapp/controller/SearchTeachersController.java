@@ -3,6 +3,7 @@ package gr.aueb.cf.schoolapp.controller;
 
 import gr.aueb.cf.schoolapp.dao.SpecialtyDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.TeacherDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.TeacherDAOException;
 import gr.aueb.cf.schoolapp.model.Teacher;
 import gr.aueb.cf.schoolapp.service.SpecialtyServiceImpl;
@@ -24,22 +25,14 @@ import java.util.List;
 @WebServlet("/schoolapp/searchTeacher")
 public class SearchTeachersController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private EntityManagerFactory emf;
+
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
     private EntityManager entityManager;
 
     private TeacherDAOHibernateImpl teacherDAO = new TeacherDAOHibernateImpl(entityManager);
     private TeacherServiceImpl teacherService = new TeacherServiceImpl(teacherDAO);
 
-    @Override
-    public void init() throws ServletException {
-        emf = Persistence.createEntityManagerFactory("myPU");
-        entityManager = emf.createEntityManager();
 
-        teacherDAO = new TeacherDAOHibernateImpl(entityManager);
-        teacherService = new TeacherServiceImpl(teacherDAO);
-
-
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -51,7 +44,8 @@ public class SearchTeachersController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String lastname = request.getParameter("lastname").trim();
-        entityManager.clear();
+        // Clear EntityManager to ensure it's up-to-date
+        HibernateHelper.getEntityManager().clear();
 
         try {
             List<Teacher> teachers = teacherService.getTeachersByLastname(lastname);
@@ -68,6 +62,11 @@ public class SearchTeachersController extends HttpServlet {
             request.setAttribute("message", message);
             request.getRequestDispatcher("/school/static/templates/teachersmenu.jsp").forward(request, response);
         }
+    }
+    @Override
+    public void destroy() {
+        // Close EntityManager when servlet is destroyed
+        HibernateHelper.closeEntityManager();
     }
 
 }

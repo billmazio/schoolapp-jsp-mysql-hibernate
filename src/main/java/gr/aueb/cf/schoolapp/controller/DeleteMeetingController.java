@@ -4,6 +4,7 @@ package gr.aueb.cf.schoolapp.controller;
 import gr.aueb.cf.schoolapp.dao.MeetingDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.StudentDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.TeacherDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.MeetingDAOException;
 import gr.aueb.cf.schoolapp.dao.exceptions.StudentDAOException;
 import gr.aueb.cf.schoolapp.dao.exceptions.TeacherDAOException;
@@ -119,6 +120,9 @@ public class DeleteMeetingController extends HttpServlet {
 
             try {
                 meetingService.deleteMeeting(id);
+                HibernateHelper.getEntityManager().clear();
+
+
                 request.setAttribute("meetingDTO", meetingDTO);
                 request.getRequestDispatcher("/school/static/templates/meetingDeleted.jsp")
                         .forward(request, response);
@@ -129,5 +133,10 @@ public class DeleteMeetingController extends HttpServlet {
                         .forward(request, response);
             }
         }
+    }
+    @Override
+    public void destroy () {
+        HibernateHelper.closeEntityManager();
+        HibernateHelper.closeEMF();
     }
 }

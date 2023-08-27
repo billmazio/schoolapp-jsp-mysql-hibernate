@@ -4,6 +4,7 @@ package gr.aueb.cf.schoolapp.controller;
 import gr.aueb.cf.schoolapp.dao.MeetingDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.StudentDAOHibernateImpl;
 import gr.aueb.cf.schoolapp.dao.TeacherDAOHibernateImpl;
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.MeetingDAOException;
 import gr.aueb.cf.schoolapp.dao.exceptions.StudentDAOException;
 import gr.aueb.cf.schoolapp.dao.exceptions.TeacherDAOException;
@@ -58,19 +59,19 @@ public class UpdateMeetingController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         Integer id = Integer.parseInt(request.getParameter("id"));
         String room = request.getParameter("room");
         String meetingDateStr = request.getParameter("meetingDate");
 
-        // Validate and convert birthdate to java.sql.Date format
+        // Validate and convert meeting date to java.sql.Date format
         java.sql.Date meetingDate = null;
         if (meetingDateStr != null && !meetingDateStr.isEmpty()) {
             try {
                 meetingDate = java.sql.Date.valueOf(meetingDateStr);
             } catch (IllegalArgumentException e) {
-                request.setAttribute("error", "Invalid birthdate format. Use 'YYYY-MM-DD'.");
-                request.getRequestDispatcher("/school/static/templates/meetingsmenu.jsp")
+                // Handle invalid date format
+                request.setAttribute("error", "Invalid date format. Use 'YYYY-MM-DD'.");
+                request.getRequestDispatcher("/school/static/templates/meetingUpdate.jsp")
                         .forward(request, response);
                 return;
             }
@@ -78,28 +79,27 @@ public class UpdateMeetingController extends HttpServlet {
 
         Teacher teacher;
         try {
-            teacher = getTeacherFromRequest(request);
+            teacher = getTeacherFromRequestWithEagerLoading(request);
         } catch (TeacherNotFoundException e) {
+            // Handle teacher not found
             request.setAttribute("error", e.getMessage());
-            request.getRequestDispatcher("/school/static/templates/meetingsmenu.jsp")
+            request.getRequestDispatcher("/school/static/templates/meetingUpdate.jsp")
                     .forward(request, response);
             return;
         }
-
 
         Student student;
         try {
-            student = getStudentFromRequest(request);
+            student = getStudentFromRequestWithEagerLoading(request);
         } catch (StudentNotFoundException e) {
+            // Handle student not found
             request.setAttribute("error", e.getMessage());
-            request.getRequestDispatcher("/school/static/templates/meetingsmenu.jsp")
+            request.getRequestDispatcher("/school/static/templates/meetingUpdate.jsp")
                     .forward(request, response);
             return;
         }
 
-
-
-    MeetingUpdateDTO newMeetingDTO = new MeetingUpdateDTO();
+        MeetingUpdateDTO newMeetingDTO = new MeetingUpdateDTO();
         newMeetingDTO.setId(id);
         newMeetingDTO.setTeacher(teacher);
         newMeetingDTO.setStudent(student);
@@ -116,33 +116,38 @@ public class UpdateMeetingController extends HttpServlet {
                         .reduce((msg1, msg2) -> msg1 + " " + msg2)
                         .orElse("");
                 request.setAttribute("error", errorMessage);
-                request.getRequestDispatcher("/school/static/templates/meetingsmenu.jsp")
+                request.getRequestDispatcher("/school/static/templates/meetingUpdate.jsp")
                         .forward(request, response);
                 return;
             }
 
-
             Meeting meeting = meetingService.updateMeeting(newMeetingDTO);
+            // Clear the entity manager
+            entityManager.clear();
+
             request.setAttribute("message", "");
             request.setAttribute("meetingUpdated", meeting);
             request.getRequestDispatcher("/school/static/templates/meetingUpdated.jsp")
                     .forward(request, response);
         } catch (MeetingNotFoundException | MeetingDAOException e) {
+            // Handle exceptions
             String message = e.getMessage();
             request.setAttribute("message", message);
             request.getRequestDispatcher("/school/static/templates/meetingUpdated.jsp")
                     .forward(request, response);
         }
-
-
     }
-    private Student getStudentFromRequest(HttpServletRequest request) throws StudentNotFoundException {
+
+    private Student getStudentFromRequestWithEagerLoading(HttpServletRequest request) throws StudentNotFoundException {
         String studentId = request.getParameter("studentId");
-        if(studentId != null && !studentId.trim().isEmpty()) {
+        if (studentId != null && !studentId.trim().isEmpty()) {
             try {
                 Optional<Student> studentOptional = Optional.ofNullable(studentService.getStudentById(Integer.parseInt(studentId)));
                 if (studentOptional.isPresent()) {
-                    return studentOptional.get();
+                    Student student = studentOptional.get();
+                    student.getCity(); // Eager loading of specialty
+                    student.getMeetings().size(); // Eager loading of meetings
+                    return student;
                 }
             } catch (NumberFormatException e) {
                 throw new StudentNotFoundException("Invalid student ID format.");
@@ -153,14 +158,16 @@ public class UpdateMeetingController extends HttpServlet {
         throw new StudentNotFoundException("Student ID not provided or is empty.");
     }
 
-
-    private Teacher getTeacherFromRequest(HttpServletRequest request) throws TeacherNotFoundException {
+    private Teacher getTeacherFromRequestWithEagerLoading(HttpServletRequest request) throws TeacherNotFoundException {
         String teacherId = request.getParameter("teacherId");
-        if(teacherId != null && !teacherId.trim().isEmpty()) {
+        if (teacherId != null && !teacherId.trim().isEmpty()) {
             try {
                 Optional<Teacher> teacherOptional = Optional.ofNullable(teacherService.getTeacherById(Integer.parseInt(teacherId)));
                 if (teacherOptional.isPresent()) {
-                    return teacherOptional.get();
+                    Teacher teacher = teacherOptional.get();
+                    teacher.getSpecialty(); // Eager loading of specialty
+                    teacher.getMeetings().size(); // Eager loading of meetings
+                    return teacher;
                 }
             } catch (NumberFormatException e) {
                 throw new TeacherNotFoundException("Invalid teacher ID format.");
@@ -171,11 +178,13 @@ public class UpdateMeetingController extends HttpServlet {
         throw new TeacherNotFoundException("Teacher ID not provided or is empty.");
     }
 
-
-
     @Override
     public void destroy() {
-        entityManager.close();
-        emf.close();
+        HibernateHelper.closeEntityManager();
+        HibernateHelper.closeEMF();
     }
+
+
+
+
 }

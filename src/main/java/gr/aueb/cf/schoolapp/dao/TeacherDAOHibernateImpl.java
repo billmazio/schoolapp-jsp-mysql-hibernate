@@ -1,144 +1,105 @@
 package gr.aueb.cf.schoolapp.dao;
 
-import java.util.logging.Logger;
-
+import gr.aueb.cf.schoolapp.dao.dbutil.HibernateHelper;
 import gr.aueb.cf.schoolapp.dao.exceptions.TeacherDAOException;
-
+import gr.aueb.cf.schoolapp.model.Meeting;
+import gr.aueb.cf.schoolapp.model.Specialty;
 import gr.aueb.cf.schoolapp.model.Teacher;
-import gr.aueb.cf.schoolapp.util.HibernateUtil;
-
-
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
 public class TeacherDAOHibernateImpl implements ITeacherDAO {
-
-
     private EntityManager entityManager;
 
     public TeacherDAOHibernateImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-
-
     @Override
     public Teacher insert(Teacher teacher) throws TeacherDAOException {
         try {
-            entityManager.getTransaction().begin();
+            EntityManager entityManager = HibernateHelper.getEntityManager();
+            HibernateHelper.beginTransaction();
+
+            Specialty specialty = teacher.getSpecialty();
+            if (specialty != null) {
+                specialty.addTeacher(teacher);  // Using convenience method
+            }
+
             entityManager.persist(teacher);
-            entityManager.getTransaction().commit();
+            HibernateHelper.commitTransaction();
+
             return teacher;
         } catch (Exception e) {
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-            throw new TeacherDAOException("Error inserting student", e);
+            HibernateHelper.rollbackTransaction();
+            throw new TeacherDAOException("Error inserting teacher", e);
         }
     }
-//    @Override
-//    public Teacher update(Teacher teacher) throws TeacherDAOException {
-//        try {
-//
-//         String jpql = "UPDATE Teacher t SET t.firstname = :firstname, t.lastname = :lastname, t.specialty = :specialty WHERE t.id = :id";
-//
-//
-//
-//           entityManager.getTransaction().begin();
-//           Teacher updatedTeacher = entityManager.merge(teacher);
-//
-//
-//            entityManager.getTransaction().commit();
-//
-//
-//           return updatedTeacher;
-//        } catch (Exception e) {
-//            if (entityManager.getTransaction().isActive()) {
-//                entityManager.getTransaction().rollback();
-//            }
-//            throw new TeacherDAOException("Error updating teacher", e);
-//        }
-//    }
-
-
 
     @Override
     public Teacher update(Teacher teacher) throws TeacherDAOException {
         try {
-            entityManager.getTransaction().begin();
+            EntityManager entityManager = HibernateHelper.getEntityManager();
+            HibernateHelper.beginTransaction();
 
-            String jpql = "UPDATE Teacher t SET t.firstname = :firstname, t.lastname = :lastname, t.specialty = (SELECT s FROM Specialty s WHERE s.id = :specialtyId) WHERE t.id = :id";
-
-            Query query = entityManager.createQuery(jpql);
-            query.setParameter("firstname", teacher.getFirstname());
-            query.setParameter("lastname", teacher.getLastname());
-            query.setParameter("specialtyId", teacher.getSpecialty().getId());
-            query.setParameter("id", teacher.getId());
-
-            int updatedCount = query.executeUpdate();
-              // <-- Clear EntityManager Cache
-
-            if (updatedCount == 0) {
-                throw new TeacherDAOException("No teacher was updated, possibly due to non-existent ID.");
+            Specialty specialty = teacher.getSpecialty();
+            if (specialty != null) {
+                specialty.addTeacher(teacher);  // Using convenience method
             }
 
+            Teacher updatedTeacher = entityManager.merge(teacher);
+            HibernateHelper.commitTransaction();
 
-            entityManager.getTransaction().commit();
-
-            entityManager.refresh(teacher);  // <-- Use Refresh
-
-            // Optionally evict or manage 2nd level cache here.
-
+            return updatedTeacher;
         } catch (Exception e) {
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-
-            }
+            HibernateHelper.rollbackTransaction();
             throw new TeacherDAOException("Error updating teacher", e);
-
         }
-        return teacher;
     }
-
-
 
     @Override
     public void delete(int id) throws TeacherDAOException {
         try {
-            entityManager.getTransaction().begin();
+            EntityManager entityManager = HibernateHelper.getEntityManager();
+            HibernateHelper.beginTransaction();
+
             Teacher teacher = getById(id);
             if (teacher != null) {
+                for(Meeting meeting : teacher.getMeetings()) {
+                    meeting.setTeacher(null);
+                }
                 entityManager.remove(teacher);
-            } else {
-                throw new TeacherDAOException("Student with ID: " + id + " not found");
             }
-            entityManager.getTransaction().commit();
+            HibernateHelper.commitTransaction();
         } catch (Exception e) {
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-            throw new TeacherDAOException("Error deleting student", e);
+            HibernateHelper.rollbackTransaction();
+            throw new TeacherDAOException("Error deleting teacher", e);
         }
     }
 
     @Override
     public Optional<List<Teacher>> getByLastname(String lastname) throws TeacherDAOException {
+        EntityManager entityManager = HibernateHelper.getEntityManager();
+
         TypedQuery<Teacher> query = entityManager.createQuery("FROM Teacher t WHERE t.lastname LIKE :lastname", Teacher.class);
         query.setParameter("lastname", lastname + "%");
+
         List<Teacher> teachers = query.getResultList();
         return teachers.isEmpty() ? Optional.empty() : Optional.of(teachers);
     }
 
     @Override
     public Teacher getById(int id) throws TeacherDAOException {
+        EntityManager entityManager = HibernateHelper.getEntityManager();
         return entityManager.find(Teacher.class, id);
     }
 
     @Override
-    public List<Teacher> getAllTeachers() throws TeacherDAOException {
+    public List<Teacher> getAllTeachers()  {
+        EntityManager entityManager = HibernateHelper.getEntityManager();
+
         TypedQuery<Teacher> query = entityManager.createQuery("FROM Teacher", Teacher.class);
         return query.getResultList();
     }
