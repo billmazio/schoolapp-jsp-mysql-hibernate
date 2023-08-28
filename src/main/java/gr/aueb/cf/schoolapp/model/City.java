@@ -61,17 +61,17 @@ public class City {
                 ", name='" + name + '\'' +
                 '}';
     }
-    public void addStudent(Student student) {
-        if (students == null) {
-            students = new ArrayList<>();
-        }
-        students.add(student);
+
+    public City addStudent(Student student) {
+        this.students.add(student);
         student.setCity(this);
+        return this;
     }
 
-    public void removeStudent(Student student) {
-        students.remove(student);
-        student.setCity(null);
+    public City removeStudent(Student student) {
+        student.setCity(null);  // Remove the association from the student side
+        this.students.remove(student);
+        return this;
     }
 }
 

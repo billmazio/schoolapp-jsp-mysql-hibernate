@@ -77,29 +77,7 @@ public class UserServiceImpl implements UserService {
         this.userDAO = userDAO;
     }
 
-//    @Override
-//    public boolean registerUser(UserDTO userDTO) throws UserNotFoundException, UserDAOException {
-//        // Validate input
-//        if (!isInputValid(userDTO)) {
-//            throw new UserNotFoundException("Invalid user input.");
-//        }
-//
-//        // Check if username already exists
-//        if (userDAO.isUserExists(userDTO.getUsername())) {
-//            throw new UserNotFoundException("Username already exists. Please choose a different username.");
-//        }
-//
-//        // Hash the user's password for secure storage
-//        String hashedPassword = hashPassword(userDTO.getPassword());
-//        userDTO.setPassword(hashedPassword);
-//
-//        // Register the user using the DAO
-//        try {
-//            return userDAO.registerUser(userDTO);
-//        } catch (UserDAOException e) {
-//            throw new UserNotFoundException("Error while registering user.", e);
-//        }
-//    }
+
 
     @Override
     public boolean registerUser(UserDTO userDTO) throws UserNotFoundException, UserDAOException {

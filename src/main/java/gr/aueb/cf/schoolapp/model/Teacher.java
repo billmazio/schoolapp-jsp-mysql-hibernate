@@ -68,6 +68,9 @@ public class Teacher {
         return specialty;
     }
 
+    public void setSpecialty(Specialty specialty) {
+        this.specialty = specialty;
+    }
 
     public List<Meeting> getMeetings() {
         return meetings;
@@ -75,6 +78,19 @@ public class Teacher {
 
     public void setMeetings(List<Meeting> meetings) {
         this.meetings = meetings;
+    }
+
+
+    public Teacher addMeeting(Meeting meeting) {
+        this.meetings.add(meeting);
+        meeting.setTeacher(this);
+        return this;
+    }
+
+    public Teacher removeMeeting(Meeting meeting) {
+        meeting.setTeacher(null);  // Remove the association from the meeting side
+        this.meetings.remove(meeting);
+        return this;
     }
 
     @Override
@@ -87,15 +103,6 @@ public class Teacher {
                 '}';
     }
 
-    public void setSpecialty(Specialty specialty) {
-        if (this.specialty != null) {
-            this.specialty.getTeachers().remove(this);
-        }
-        this.specialty = specialty;
-        if (specialty != null) {
-            specialty.getTeachers().add(this);
-        }
-    }
 
 
 }

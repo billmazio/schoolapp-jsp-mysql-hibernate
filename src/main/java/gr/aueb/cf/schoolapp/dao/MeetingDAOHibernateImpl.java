@@ -39,19 +39,19 @@ public class MeetingDAOHibernateImpl implements IMeetingDAO {
         try {
             EntityManager entityManager = HibernateHelper.getEntityManager();
             HibernateHelper.beginTransaction();
-            entityManager.persist(meeting);
 
             Teacher teacher = meeting.getTeacher();
             Student student = meeting.getStudent();
 
             if (teacher != null) {
-                teacher.getMeetings().add(meeting);
+                teacher.addMeeting(meeting);  // Use the convenience method
             }
 
             if (student != null) {
-                student.getMeetings().add(meeting);
+                student.addMeeting(meeting);  // Use the convenience method
             }
 
+            entityManager.persist(meeting);
             HibernateHelper.commitTransaction();
             return meeting;
         } catch (Exception e) {
@@ -65,7 +65,12 @@ public class MeetingDAOHibernateImpl implements IMeetingDAO {
         try {
             EntityManager entityManager = HibernateHelper.getEntityManager();
             HibernateHelper.beginTransaction();
+
+            // Existing Teacher and Student can be fetched and their convenience methods could be used for removing old meetings
+            // But let's assume the update doesn't affect the associated Teacher and Student
+
             Meeting updatedMeeting = entityManager.merge(meeting);
+
             HibernateHelper.commitTransaction();
             return updatedMeeting;
         } catch (Exception e) {
@@ -79,27 +84,31 @@ public class MeetingDAOHibernateImpl implements IMeetingDAO {
         try {
             EntityManager entityManager = HibernateHelper.getEntityManager();
             HibernateHelper.beginTransaction();
+
             Meeting meeting = getById(id);
+
             if (meeting != null) {
                 Teacher teacher = meeting.getTeacher();
                 Student student = meeting.getStudent();
 
                 if (teacher != null) {
-                    teacher.getMeetings().remove(meeting);
+                    teacher.removeMeeting(meeting);  // Use the convenience method
                 }
 
                 if (student != null) {
-                    student.getMeetings().remove(meeting);
+                    student.removeMeeting(meeting);  // Use the convenience method
                 }
 
                 entityManager.remove(meeting);
             } else {
                 throw new MeetingDAOException("Meeting with ID: " + id + " not found");
             }
+
             HibernateHelper.commitTransaction();
         } catch (Exception e) {
             HibernateHelper.rollbackTransaction();
             throw new MeetingDAOException("Error deleting meeting", e);
         }
     }
+
 }

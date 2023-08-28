@@ -87,6 +87,10 @@ public class Student {
         this.birthdate = birthdate;
     }
 
+    public void setCity(City city) {
+        this.city = city;
+    }
+
     public City getCity() {
         return city;
     }
@@ -100,6 +104,19 @@ public class Student {
         this.meetings = meetings;
     }
 
+
+    public Student addMeeting(Meeting meeting) {
+        this.meetings.add(meeting);
+        meeting.setStudent(this);
+        return this;
+    }
+
+    public Student removeMeeting(Meeting meeting) {
+        meeting.setStudent(null);  // Remove the association from the meeting side
+        this.meetings.remove(meeting);
+        return this;
+    }
+
     @Override
     public String toString() {
         return "student{" +
@@ -111,16 +128,6 @@ public class Student {
                 ", city=" + city +
                 '}';
     }
-
-    public void setCity(City city) {
-        if (this.city != null) {
-            this.city.getStudents().remove(this);
-        }
-        this.city = city;
-        if (city != null) {
-            city.getStudents().add(this);
-        }
-   }
 
 
 }

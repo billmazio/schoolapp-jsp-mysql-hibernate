@@ -72,6 +72,14 @@ public class Meeting {
         this.meetingDate = meetingDate;
     }
 
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
     @Override
     public String toString() {
         return "Meeting{" +
@@ -82,25 +90,7 @@ public class Meeting {
                 ", meetingDate=" + meetingDate +
                 '}';
     }
-    public void setTeacher(Teacher teacher) {
-        if (this.teacher != null) {
-            this.teacher.getMeetings().remove(this);
-        }
-        this.teacher = teacher;
-        if (teacher != null) {
-            teacher.getMeetings().add(this);
-        }
-    }
 
-    public void setStudent(Student student) {
-        if (this.student != null) {
-            this.student.getMeetings().remove(this);
-        }
-        this.student = student;
-        if (student != null) {
-            student.getMeetings().add(this);
-        }
-    }
 
 
 }

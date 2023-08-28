@@ -64,17 +64,16 @@ import java.util.List;
         }
 
 
-    public void addTeacher(Teacher teacher) {
-        if (teachers == null) {
-            teachers = new ArrayList<>();
-        }
-        teachers.add(teacher);
+    public Specialty addTeacher(Teacher teacher) {
+        this.teachers.add(teacher);
         teacher.setSpecialty(this);
+        return this;
     }
 
-    public void removeTeacher(Teacher teacher) {
-        teachers.remove(teacher);
-        teacher.setSpecialty(null);
+    public Specialty removeTeacher(Teacher teacher) {
+            teacher.setSpecialty(null);
+            this.teachers.remove(teacher);
+            return this;
     }
 
     }
