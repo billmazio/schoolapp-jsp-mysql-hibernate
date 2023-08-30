@@ -39,7 +39,7 @@ public class SearchSpecialtyController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String name = request.getParameter("name").trim();
         // Clear EntityManager to ensure it's up-to-date
-        HibernateHelper.getEntityManager().clear();
+       // HibernateHelper.getEntityManager().clear();
 
         try {
             List<Specialty> specialties = specialtyService.getSpecialtiesBySpecialtyName(name);

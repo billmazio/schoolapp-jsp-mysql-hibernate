@@ -31,12 +31,10 @@ import java.util.Optional;
 @WebServlet("/schoolapp/teacherInsert")
 public class InsertTeacherController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-        private EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
-        private EntityManager entityManager = emf.createEntityManager();
-
-        private TeacherDAOHibernateImpl teacherDAO = new TeacherDAOHibernateImpl(entityManager);
-        private TeacherServiceImpl teacherService = new TeacherServiceImpl(teacherDAO);
-
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
+    private EntityManager entityManager = emf.createEntityManager();
+    private TeacherDAOHibernateImpl teacherDAO = new TeacherDAOHibernateImpl(entityManager);
+    private TeacherServiceImpl teacherService = new TeacherServiceImpl(teacherDAO);
     private SpecialtyDAOHibernateImpl specialtyDAO = new SpecialtyDAOHibernateImpl(entityManager);
     private SpecialtyServiceImpl specialtyService = new SpecialtyServiceImpl(specialtyDAO);
 
@@ -61,8 +59,9 @@ public class InsertTeacherController extends HttpServlet {
         String firstname = request.getParameter("firstname").trim();
         String lastname = request.getParameter("lastname").trim();
 
+
         // Check if any of the required fields are empty
-        if (firstname.isEmpty() || lastname.isEmpty() ) {
+        if (firstname.isEmpty() || lastname.isEmpty()) {
             request.setAttribute("error", "All fields are required.");
             forwardToTeachersMenu(request, response);
             return;
@@ -129,6 +128,6 @@ public class InsertTeacherController extends HttpServlet {
     @Override
     public void destroy() {
         HibernateHelper.closeEntityManager();
-        HibernateHelper.closeEMF();
+        //HibernateHelper.closeEMF();
     }
 }

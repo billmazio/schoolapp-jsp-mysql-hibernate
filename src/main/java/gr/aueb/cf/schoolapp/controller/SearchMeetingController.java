@@ -43,7 +43,7 @@ public class SearchMeetingController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String room = request.getParameter("room").trim();
         // Clear EntityManager to ensure it's up-to-date
-        HibernateHelper.getEntityManager().clear();
+       // HibernateHelper.getEntityManager().clear();
 
 
         try {

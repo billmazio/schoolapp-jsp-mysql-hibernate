@@ -45,7 +45,7 @@ public class SearchTeachersController extends HttpServlet {
             throws ServletException, IOException {
         String lastname = request.getParameter("lastname").trim();
         // Clear EntityManager to ensure it's up-to-date
-        HibernateHelper.getEntityManager().clear();
+       // HibernateHelper.getEntityManager().clear();
 
         try {
             List<Teacher> teachers = teacherService.getTeachersByLastname(lastname);
@@ -55,6 +55,7 @@ public class SearchTeachersController extends HttpServlet {
             } else {
                 request.setAttribute("teachers", teachers);
                 request.getRequestDispatcher("/school/static/templates/teachers.jsp").forward(request, response);
+
             }
         } catch (TeacherNotFoundException | TeacherDAOException e) {
             String message = e.getMessage();
@@ -63,6 +64,7 @@ public class SearchTeachersController extends HttpServlet {
             request.getRequestDispatcher("/school/static/templates/teachersmenu.jsp").forward(request, response);
         }
     }
+
     @Override
     public void destroy() {
         // Close EntityManager when servlet is destroyed

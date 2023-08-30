@@ -26,7 +26,7 @@ public class StudentDAOHibernateImpl implements IStudentDAO {
 
             City city = student.getCity();
             if (city != null) {
-                city.addStudent(student);  // Using convenience method
+                city.addStudent(student);
             }
 
             entityManager.persist(student);

@@ -7,6 +7,7 @@ import gr.aueb.cf.schoolapp.dto.MeetingUpdateDTO;
 import gr.aueb.cf.schoolapp.model.Meeting;
 import gr.aueb.cf.schoolapp.service.exceptions.MeetingNotFoundException;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,7 @@ public class MeetingServiceImpl implements IMeetingService{
        return meetingDAO.insert(meeting);
     }
 
+    @Transactional
     @Override
     public Meeting updateMeeting(MeetingUpdateDTO dto) throws MeetingDAOException, MeetingNotFoundException {
       Meeting meeting = meetingDAO.getById(dto.getId());

@@ -41,6 +41,13 @@ public class CityDAOHibernateImpl implements ICityDAO {
             EntityManager entityManager = HibernateHelper.getEntityManager();
             HibernateHelper.beginTransaction();
 
+            List<Student> students = city.getStudents();
+            if (students != null) {
+                for (Student student : students) {
+                    city.addStudent(student);  // Using convenience method
+                }
+            }
+
             entityManager.persist(city);
             HibernateHelper.commitTransaction();
 
@@ -50,6 +57,7 @@ public class CityDAOHibernateImpl implements ICityDAO {
             throw new CityDAOException("Error inserting city", e);
         }
     }
+
 
     @Override
     public City update(City city) throws CityDAOException {
@@ -66,6 +74,11 @@ public class CityDAOHibernateImpl implements ICityDAO {
             throw new CityDAOException("Error updating city", e);
         }
     }
+
+
+
+
+
 
     @Override
     public void delete(int id) throws CityDAOException {

@@ -93,6 +93,23 @@ public class Teacher {
         return this;
     }
 
+    public Teacher addSpecialty(Specialty specialty) {
+        this.specialty = specialty;
+        specialty.getTeachers().add(this);
+        return this;
+    }
+
+    public Teacher removeSpecialty() {
+        if (this.specialty != null) {
+            this.specialty.getTeachers().remove(this);
+            this.specialty = null;
+        }
+        return this;
+    }
+
+
+
+
     @Override
     public String toString() {
         return "teacher{" +

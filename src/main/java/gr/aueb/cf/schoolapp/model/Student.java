@@ -87,9 +87,7 @@ public class Student {
         this.birthdate = birthdate;
     }
 
-    public void setCity(City city) {
-        this.city = city;
-    }
+
 
     public City getCity() {
         return city;
@@ -104,6 +102,9 @@ public class Student {
         this.meetings = meetings;
     }
 
+    public void setCity(City city) {
+        this.city = city;
+    }
 
     public Student addMeeting(Meeting meeting) {
         this.meetings.add(meeting);
@@ -116,7 +117,17 @@ public class Student {
         this.meetings.remove(meeting);
         return this;
     }
+    public Student addToCity(City city) {
+        city.addStudent(this);
+        return this;
+    }
 
+    public Student removeFromCity() {
+        if (this.city != null) {
+            this.city.removeStudent(this);
+        }
+        return this;
+    }
     @Override
     public String toString() {
         return "student{" +

@@ -43,7 +43,7 @@ public class SearchCitiesController extends HttpServlet {
         //response.setContentType("text/html; charset=UTF-8");
         String name = request.getParameter("name").trim();
         // Clear EntityManager to ensure it's up-to-date
-        HibernateHelper.getEntityManager().clear();
+      //  HibernateHelper.getEntityManager().clear();
 
         try {
             List<City> cities = cityService.getCitiesByCityName(name);

@@ -34,12 +34,15 @@ public class SpecialtyDAOHibernateImpl implements ISpecialtyDAO {
         EntityManager entityManager = HibernateHelper.getEntityManager();
         return entityManager.find(Specialty.class, id);
     }
-
     @Override
     public Specialty insert(Specialty specialty) throws SpecialtyDAOException {
         try {
             EntityManager entityManager = HibernateHelper.getEntityManager();
             HibernateHelper.beginTransaction();
+
+            for (Teacher teacher : specialty.getTeachers()) {
+                teacher.addSpecialty(specialty);  // Use convenience method
+            }
 
             entityManager.persist(specialty);
             HibernateHelper.commitTransaction();
@@ -76,7 +79,7 @@ public class SpecialtyDAOHibernateImpl implements ISpecialtyDAO {
             Specialty specialty = getById(id);
             if (specialty != null) {
                 for (Teacher teacher : new ArrayList<>(specialty.getTeachers())) {
-                    specialty.removeTeacher(teacher);
+                    specialty.removeTeacher(teacher);  // Use convenience method
                 }
                 entityManager.remove(specialty);
             } else {

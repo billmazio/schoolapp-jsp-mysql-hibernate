@@ -8,6 +8,7 @@ import gr.aueb.cf.schoolapp.model.Teacher;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TeacherDAOHibernateImpl implements ITeacherDAO {
@@ -38,15 +39,23 @@ public class TeacherDAOHibernateImpl implements ITeacherDAO {
         }
     }
 
+
     @Override
     public Teacher update(Teacher teacher) throws TeacherDAOException {
         try {
             EntityManager entityManager = HibernateHelper.getEntityManager();
             HibernateHelper.beginTransaction();
 
-            Specialty specialty = teacher.getSpecialty();
-            if (specialty != null) {
-                specialty.addTeacher(teacher);  // Using convenience method
+            Specialty oldSpecialty = getById(teacher.getId()).getSpecialty();
+            Specialty newSpecialty = teacher.getSpecialty();
+
+            if (!Objects.equals(oldSpecialty, newSpecialty)) {
+                if (oldSpecialty != null) {
+                    oldSpecialty.removeTeacher(teacher);  // Using convenience method
+                }
+                if (newSpecialty != null) {
+                    newSpecialty.addTeacher(teacher);  // Using convenience method
+                }
             }
 
             Teacher updatedTeacher = entityManager.merge(teacher);
@@ -58,7 +67,6 @@ public class TeacherDAOHibernateImpl implements ITeacherDAO {
             throw new TeacherDAOException("Error updating teacher", e);
         }
     }
-
     @Override
     public void delete(int id) throws TeacherDAOException {
         try {

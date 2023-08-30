@@ -9,6 +9,7 @@ import gr.aueb.cf.schoolapp.service.exceptions.TeacherNotFoundException;
 
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,23 +32,7 @@ public class TeacherServiceImpl implements ITeacherService {
         return teacherDAO.insert(teacher);
     }
 
-//    @Override
-//    public Teacher updateTeacher(TeacherUpdateDTO dto) throws TeacherDAOException, TeacherNotFoundException {
-//        if (dto == null) return null;
-//        Teacher teacher;
-//
-//        try {
-//            teacher = map(dto);
-//            if (teacherDAO.getById(teacher.getId()) == null) {
-//                throw new TeacherNotFoundException(teacher);
-//            }
-//
-//            return teacherDAO.update(teacher);
-//        } catch (TeacherDAOException | TeacherNotFoundException e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//    }
+@Transactional
 @Override
 public Teacher updateTeacher(TeacherUpdateDTO dto) throws TeacherDAOException, TeacherNotFoundException {
     if (dto == null) return null;

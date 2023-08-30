@@ -7,6 +7,7 @@ import gr.aueb.cf.schoolapp.dto.StudentUpdateDTO;
 import gr.aueb.cf.schoolapp.model.Student;
 import gr.aueb.cf.schoolapp.service.exceptions.StudentNotFoundException;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +19,6 @@ public class StudentServiceImpl implements IStudentService{
         this.studentDAO = studentDAO;
     }
 
-    public StudentServiceImpl() {
-    }
 
     @Override
     public Student insertStudent(StudentInsertDTO dto) throws StudentDAOException {
@@ -34,6 +33,7 @@ public class StudentServiceImpl implements IStudentService{
         return studentDAO.insert(student);
     }
 
+    @Transactional
     @Override
     public Student updateStudent(StudentUpdateDTO dto) throws StudentDAOException, StudentNotFoundException {
         Student student = studentDAO.getById(dto.getId());
@@ -48,6 +48,7 @@ public class StudentServiceImpl implements IStudentService{
 
         return studentDAO.update(student);
     }
+
 
     @Override
     public void deleteStudent(int id) throws StudentDAOException, StudentNotFoundException {

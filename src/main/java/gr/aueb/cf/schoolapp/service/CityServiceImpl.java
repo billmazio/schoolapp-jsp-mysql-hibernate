@@ -8,6 +8,7 @@ import gr.aueb.cf.schoolapp.model.City;
 
 import gr.aueb.cf.schoolapp.service.exceptions.CityNotFoundException;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ public class CityServiceImpl implements ICityService {
         }
 
     }
+    @Transactional
     @Override
     public City updateCity(CityUpdateDTO dto) throws CityDAOException, CityNotFoundException {
         if (dto == null) return null;

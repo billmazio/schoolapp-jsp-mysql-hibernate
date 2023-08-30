@@ -6,6 +6,7 @@ package gr.aueb.cf.schoolapp.model;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "specialties")
@@ -20,7 +21,7 @@ import java.util.List;
         private String name;
 
 
-        @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL)
+        @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL,orphanRemoval = true)
         private List<Teacher> teachers = new ArrayList<>();
 
         public Specialty() {
@@ -76,5 +77,6 @@ import java.util.List;
             return this;
     }
 
-    }
+
+}
 
